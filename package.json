@@ -1,0 +1,22 @@
+{
+  "name": "kicks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Contador web gratuito de movimientos durante el embarazo",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test",
+    "check": "npm run test && npm run build"
+  },
+  "engines": {
+    "php": "^8.2",
+    "node": "^20"
+  },
+  "devDependencies": {},
+  "notes": {
+    "production": "Node.js is NOT required for production. The application runs on PHP 8.2+ with Apache 2.4+. Use 'php scripts/build.php' to compile assets.",
+    "development": "Node.js 20+ can be used for running tests and build scripts during development. Use 'php scripts/build.php' or 'npm run build' to compile assets."
+  }
+}
+
