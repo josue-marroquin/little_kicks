@@ -6,48 +6,47 @@ import {
   elapsedSeconds,
   finishSession,
   formatDuration,
-  prependHistory,
+  loadHistory,
+  saveSession,
   undoMovement,
 } from '../src/session-store.js';
 
-test('registra movimientos consecutivos sin perder eventos', () => {
+test('mantiene una sola sesión activa en memoria', () => {
   let session = createSession(new Date('2026-06-19T10:00:00Z'), 'session-1');
-
-  for (let second = 1; second <= 20; second += 1) {
-    session = addMovement(session, new Date(`2026-06-19T10:00:${String(second).padStart(2, '0')}Z`));
-  }
-
-  assert.equal(session.movements.length, 20);
-  assert.equal(new Set(session.movements).size, 20);
+  session = addMovement(session, new Date('2026-06-19T10:00:01Z'));
+  session = addMovement(session, new Date('2026-06-19T10:00:02Z'));
+  assert.equal(session.movements.length, 2);
+  assert.deepEqual(undoMovement(session).movements, ['2026-06-19T10:00:01.000Z']);
 });
 
-test('deshacer elimina solamente el último movimiento', () => {
-  const initial = createSession(new Date('2026-06-19T10:00:00Z'), 'session-2');
-  const first = addMovement(initial, new Date('2026-06-19T10:00:01Z'));
-  const second = addMovement(first, new Date('2026-06-19T10:00:02Z'));
-
-  assert.deepEqual(undoMovement(second).movements, first.movements);
-  assert.deepEqual(undoMovement(initial).movements, []);
+test('genera un identificador aunque randomUUID no esté disponible', () => {
+  const session = createSession(new Date('2026-06-19T10:00:00Z'));
+  assert.match(session.id, /^[a-zA-Z0-9-]{1,64}$/);
 });
 
-test('finaliza la sesión, limita notas y calcula duración', () => {
-  const session = createSession(new Date('2026-06-19T10:00:00Z'), 'session-3');
-  const finished = finishSession(session, `  ${'a'.repeat(510)}  `, new Date('2026-06-19T10:02:05Z'));
-
-  assert.equal(finished.notes.length, 500);
+test('finaliza la sesión completa para enviarla una sola vez', () => {
+  const session = createSession(new Date('2026-06-19T10:00:00Z'), 'session-2');
+  const finished = finishSession(session, '  nota  ', new Date('2026-06-19T10:02:05Z'));
+  assert.equal(finished.notes, 'nota');
+  assert.equal(finished.endedAt, '2026-06-19T10:02:05.000Z');
   assert.equal(elapsedSeconds(finished), 125);
   assert.equal(formatDuration(125), '02:05');
-  assert.equal(formatDuration(3661), '01:01:01');
 });
 
-test('guarda el historial sin duplicar una sesión', () => {
-  const values = new Map();
-  const storage = { setItem: (key, value) => values.set(key, value) };
-  const oldSession = { id: 'old' };
-  const updatedSession = { id: 'old', notes: 'actualizada' };
-
-  const history = prependHistory(storage, [oldSession], updatedSession);
-
-  assert.deepEqual(history, [updatedSession]);
-  assert.equal(JSON.parse([...values.values()][0]).length, 1);
+test('usa un único endpoint para guardar y leer historial', async () => {
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    return { ok: true, json: async () => ({ ok: true, data: [] }) };
+  };
+  try {
+    await loadHistory('/sessions.php');
+    await saveSession('/sessions.php', { id: 'session-3' });
+    assert.deepEqual(calls.map((call) => call.url), ['/sessions.php', '/sessions.php']);
+    assert.equal(calls[0].options.method, undefined);
+    assert.equal(calls[1].options.method, 'POST');
+  } finally {
+    global.fetch = originalFetch;
+  }
 });

@@ -17,22 +17,19 @@ declare(strict_types=1);
         <header class="brand">
             <span class="brand__mark" aria-hidden="true">K</span>
             <div>
-                <p class="brand__name"><strong>Kicks</strong></p>
-                <p class="brand__tagline">Simple. Privado. Siempre gratis.</p>
+                <p class="brand__name"><strong>Little Kicks</strong></p>
             </div>
         </header>
 
         <section id="counter-view">
             <div class="hero">
-                <p class="eyebrow">Un momento para conectar</p>
                 <h1>Cuenta cada<br>movimiento</h1>
-                <p class="hero__copy">Registra los movimientos de forma sencilla y guarda un historial en este dispositivo.</p>
             </div>
 
             <div id="empty-state" class="panel empty-state">
                 <div class="empty-state__icon" aria-hidden="true">✦</div>
                 <h2>¿Lista para comenzar?</h2>
-                <p>Inicia una sesión cuando quieras prestar atención a los movimientos.</p>
+                <p>Inicia un conteo cuando quieras prestar atención a los movimientos.</p>
                 <button id="start-session" class="primary-button" type="button">Iniciar conteo</button>
             </div>
 
@@ -65,14 +62,14 @@ declare(strict_types=1);
                 </div>
             </div>
 
-            <p class="privacy-note">Tus registros permanecen en este navegador. Kicks no sustituye la orientación de un profesional de salud.</p>
+            <p class="privacy-note">Tus registros se guardan de forma privada.</p>
         </section>
 
         <section id="history-view" hidden>
             <header class="history-header">
                 <p class="eyebrow">Tus registros</p>
                 <h2>Historial</h2>
-                <p>Sesiones guardadas en este dispositivo.</p>
+                <p>Sesiones guardadas.</p>
             </header>
             <div id="history-empty" class="history-empty">Aún no hay sesiones guardadas.</div>
             <div id="history-list" class="history-list"></div>
